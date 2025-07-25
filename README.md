@@ -73,6 +73,17 @@ bazel_dep(name = "sphinx_rust", version = "0.0.0-dev")
 local_path_override(module_name = "sphinx_rust", path = "../sphinx-rust")
 ```
 
+- __docs-as-code__/docs.bzl:
+
+```python
+def _incremental ...
+
+    py_binary(
+        name = incremental_name,
+        srcs = ["@score_docs_as_code//src:incremental.py"],
+        deps = dependencies + ["@sphinx_rust//:sphinx_rust"],
+```
+
 - create the dummy_crate in __score__ with the following structure and content:
 
 ```sh
@@ -116,4 +127,18 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+```
+
+It can be tested using requirements.in from docs-as-code as well but this is not that reliable as bazel will cache sphinx-rust:
+
+- in __docs-as-code__/src/requirements.in:
+
+```python
+sphinx-rust @ file:///mnt/d/qorix/forks/sphinx-rust
+```
+
+- run pip packages update:
+
+```sh
+bazel run //src:requirements.update
 ```
