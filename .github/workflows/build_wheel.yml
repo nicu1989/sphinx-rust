@@ -16,10 +16,6 @@ jobs:
         target:
         - x86_64
         - x86
-        - aarch64
-        - armv7
-        - s390x
-        - ppc64le
       fail-fast: false
 
     steps:
@@ -41,7 +37,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist -i python3.12
           sccache: 'true'
           manylinux: auto
 
