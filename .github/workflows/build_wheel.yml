@@ -13,6 +13,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        target:
+        - x86_64
+        - x86
+        - aarch64
+        - armv7
+        - s390x
+        - ppc64le
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -29,16 +37,13 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Build wheel (manylinux2014, cp312)
-        run: |
-          PY=/opt/python/cp312-cp312/bin/python #pin to 3.12
-          $PY -m pip install --upgrade maturin
-          maturin build \
-            --manifest-path crates/py_binding/Cargo.toml \
-            --release \
-            --out dist \
-            --compatibility manylinux_2_17 \
-            --interpreter $PY
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist --find-interpreter
+          sccache: 'true'
+          manylinux: auto
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
