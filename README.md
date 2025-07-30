@@ -11,11 +11,34 @@ See [docs/](docs/) for more information.
 [pypi-badge]: https://img.shields.io/pypi/v/sphinx-rust.svg
 [pypi-link]: https://pypi.org/project/sphinx-rust
 
-## Fork notes
+# Fork notes
 
-### Integration, usage and testing
+## Release and Integration
 
 **CURRENTLY FORK UNDER DEVELOPMENT! - PIP PACKAGE UNAVAILABLE**
+
+### Release:
+
+The repo supports releasing github hosted wheels based on tags. This requires choosing a release name(example 0.0.2-dev1) that needs to be updated in order:
+
+* update `version = "0.0.2-dev1"` in `crates/py_binding/Cargo.toml`
+```sh
+git add .
+git commit -m "Bump to 0.0.2-dev1"
+git tag v0.0.2-dev1
+git push --follow-tags
+```
+CI starts after `git push --follow-tags`, builds wheels, attaches them to the tag’s GitHub Release. Done.
+
+### Integration:
+
+In the desired `requirements.in` reference the released wheel:
+
+```python
+sphinx-rust @ https://github.com/qorix-group/sphinx-rust/releases/download/v0.0.2-dev1/sphinx_rust-0.0.2-dev1-cp312-cp312-manylinux_2_17_x86_64.whl
+```
+
+## Development
 
 * In order to integrate in score:
 
