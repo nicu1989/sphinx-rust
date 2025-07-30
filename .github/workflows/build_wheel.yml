@@ -38,8 +38,11 @@ jobs:
             --out dist
             --compatibility manylinux_2_17
 
-      - uses: actions/upload-artifact@v4
-        path: dist/*.whl
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist/*.whl
 
   release:
     needs: build
