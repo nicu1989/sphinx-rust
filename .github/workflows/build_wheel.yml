@@ -36,7 +36,8 @@ jobs:
             --manifest-path crates/py_binding/Cargo.toml
             --release
             --out dist
-            --compatibility manylinux_2_17
+            --find-interpreter
+          manylinux: auto
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
