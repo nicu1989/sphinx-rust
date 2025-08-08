@@ -10,7 +10,7 @@ pub fn analyze_crate(path: &str) -> Result<AnalysisResult> {
     // make the path absolute
     // TODO we use dunce to canonicalize the path because otherwise there is issues with python's os.path.relpath on windows, but maybe we should fix this on the Python side
     let crate_dir =
-        dunce::canonicalize(path).context(format!("Error resolving crate path: {}", path))?;
+        dunce::canonicalize(path).context(format!("Error resolving crate path: {path}"))?;
     eprintln!("running new analyzer");
     // check the path is a directory
     if !crate_dir.is_dir() {
@@ -43,7 +43,12 @@ pub fn analyze_crate(path: &str) -> Result<AnalysisResult> {
         .targets
         .iter()
         .find(|t| t.kind.contains(&"lib".into()))
-        .or_else(|| root_pkg.targets.iter().find(|t| t.kind.contains(&"bin".into())))
+        .or_else(|| {
+            root_pkg
+                .targets
+                .iter()
+                .find(|t| t.kind.contains(&"bin".into()))
+        })
         .ok_or_else(|| anyhow!("No lib or bin target defined in manifest"))?;
 
     let crate_name = root_target.name.clone();
@@ -61,15 +66,11 @@ pub fn analyze_crate(path: &str) -> Result<AnalysisResult> {
 
     // read the top-level module
     let content = std::fs::read_to_string(&root_module)?;
-    let (module, structs, enums, functions) = Module::parse(
-        Some(&root_module),
-        &[&result.crate_.name],
-        &content,
-    )
-    .context(format!(
-        "Error parsing module {}",
-        root_module.to_string_lossy()
-    ))?;
+    let (module, structs, enums, functions) =
+        Module::parse(Some(&root_module), &[&result.crate_.name], &content).context(format!(
+            "Error parsing module {}",
+            root_module.to_string_lossy()
+        ))?;
 
     let mut modules_to_read = module
         .declarations
@@ -91,20 +92,21 @@ pub fn analyze_crate(path: &str) -> Result<AnalysisResult> {
     // recursively find/read the public sub‑modules
     let mut read_modules = vec![];
     while let Some((parent_dir, module_name, parent)) = modules_to_read.pop() {
-        let (module_path, submodule_dir) = if parent_dir.join(&module_name).with_extension("rs").exists() {
-            (
-                parent_dir.join(&module_name).with_extension("rs"),
-                parent_dir.join(&module_name),
-            )
-        } else if parent_dir.join(&module_name).join("mod.rs").exists() {
-            (
-                parent_dir.join(&module_name).join("mod.rs"),
-                parent_dir.to_path_buf(),
-            )
-        } else {
-            // TODO warn about missing module?
-            continue;
-        };
+        let (module_path, submodule_dir) =
+            if parent_dir.join(&module_name).with_extension("rs").exists() {
+                (
+                    parent_dir.join(&module_name).with_extension("rs"),
+                    parent_dir.join(&module_name),
+                )
+            } else if parent_dir.join(&module_name).join("mod.rs").exists() {
+                (
+                    parent_dir.join(&module_name).join("mod.rs"),
+                    parent_dir.to_path_buf(),
+                )
+            } else {
+                // TODO warn about missing module?
+                continue;
+            };
 
         if read_modules.contains(&module_path) {
             continue;

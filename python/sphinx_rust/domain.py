@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import re
 import shutil
 from typing import TYPE_CHECKING, Literal, TypedDict
-import re
 
 from sphinx import addnodes
 from sphinx.domains import Domain
@@ -21,7 +21,6 @@ from sphinx_rust.directives.module import RustModuleAutoDirective
 from sphinx_rust.directives.struct import RustStructAutoDirective
 from sphinx_rust.sphinx_rust import analyze_crate, load_descendant_modules
 
-
 INVALID_CHARS = r"[^A-Za-z0-9._-]"
 
 
@@ -33,6 +32,7 @@ def slugify_rust_name(fullname: str) -> Path:
     parts = fullname.split("::")
     cleaned = [re.sub(INVALID_CHARS, "_", p) for p in parts]
     return Path(*cleaned)
+
 
 if TYPE_CHECKING:
     from docutils.nodes import Element
@@ -248,7 +248,7 @@ def create_object_pages(folder: Path, otype: str, names: list[str]) -> None:
         "",
         ".. toctree::",
         "    :maxdepth: 1",
-        ""
+        "",
     ]
 
     for rust_name in names:
@@ -280,12 +280,14 @@ def create_code_pages(crate_name: str, srcdir: Path, cache: Path) -> None:
             dst.parent.mkdir(parents=True, exist_ok=True)
 
             dst.write_text(
-                "\n".join((
-                    ":orphan:",
-                    "",
-                    f".. literalinclude:: {os.path.relpath(file_path, dst.parent)}",
-                    f"   :name: rust-code:{full_name}",
-                    "   :language: rust",
-                    "   :linenos:",
-                ))
+                "\n".join(
+                    (
+                        ":orphan:",
+                        "",
+                        f".. literalinclude:: {os.path.relpath(file_path, dst.parent)}",
+                        f"   :name: rust-code:{full_name}",
+                        "   :language: rust",
+                        "   :linenos:",
+                    )
+                )
             )

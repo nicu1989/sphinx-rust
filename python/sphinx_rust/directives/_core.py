@@ -31,7 +31,7 @@ class RustAutoDirective(SphinxDirective):
 
     @property
     def doc(self) -> nodes.document:
-        return self.state.document  # type: ignore[no-any-return]
+        return self.state.document
 
     @property
     def rust_config(self) -> RustConfig:

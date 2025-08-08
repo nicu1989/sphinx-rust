@@ -37,7 +37,7 @@ classifiers = [
   "Topic :: Text Processing :: Markup",
 ]
 dependencies = [
-  "sphinx>=7.3"
+  "sphinx>=8,<9"
 ]
 
 [project.urls]
